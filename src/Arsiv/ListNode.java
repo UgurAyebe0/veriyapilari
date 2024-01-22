@@ -1,84 +1,63 @@
 package Arsiv;
 
 
-import static Arsiv.BList.ilkNode;
-import static Arsiv.BList.listele;
-
+import static Arsiv.BList.*;
+import static Arsiv.Search.minmaxAra;
 
 public class ListNode {
-
     public static char[] Harfler = {'A', 'B', 'C', 'Ç', 'D', 'E', 'F', 'G', 'Ğ', 'H', 'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'Y', 'Z'};
-
 
     public static void main(String[] args) {
 
-
+        // Sakın silme hata verir
         BList bl = new BList();
+        Node aktif = ilkNode;
 
 
-        Node aktif; // Node aktif
-        Node aktif2; // Node Aktif2
-
+        // 3 kelimeli harfleri buradan ekleyeceğiz. min ve alt 0 kullanacağız
         for (int i = 0; i < Harfler.length; i++) {
-            aktif = ilkNode.sonraki;
-            aktif2 = ilkNode.sonraki;
-
-            bl.ekle(String.valueOf(Harfler[i]), 0);
-
-
-            aktif2 = aktif2.sonraki;
-
-            if (i == Harfler.length - 1) {
-
-                for (int j = 0; j < Harfler.length; j++) {
-
-                    for (int k = 0; k < Harfler.length; k++) {
-                        bl.ekle((" " + Harfler[j] + Harfler[k]), 0);
-                        aktif2 = aktif2.sonraki;
-                    }
-
-                    aktif2 = aktif2.onceki;
-
-                    aktif.altbasamak = aktif2.Harf.hashCode();
-
-                    aktif2 = aktif2.sonraki;
-
-
+            for (int j = 0; j < Harfler.length; j++) {
+                for (int k = 0; k < Harfler.length; k++) {
+                    ekle(" " + Harfler[i] + Harfler[j] + Harfler[k] , true , aktif.hashCode() , 0);
                     aktif = aktif.sonraki;
-
-
-                }
-
-                // Üçüncü for döngüsü (4 harfli kombinasyonlar)
-                for (int j = 0; j < Harfler.length; j++) {
-
-                    // Dördüncü for döngüsü
-                    for (int k = 0; k < Harfler.length; k++) {
-
-                        // Beşinci for döngüsü
-                        for (int l = 0; l < Harfler.length; l++) {
-
-
-                            bl.ekle((" " + Harfler[j] + Harfler[k] + Harfler[l]), 0);
-                            aktif2 = aktif2.sonraki;
-                        }
-
-                        // Aktif2'yi bir önceki konumuna getiriyorum
-                        aktif2 = aktif2.onceki;
-
-                        // Aktif düğümün alt basamağını mevcut aktif2'nin harf kodu yapıyorum
-                        aktif.altbasamak = aktif2.Harf.hashCode();
-
-                        // Dördüncü for döngüsünden sonraki hareketler
-                        aktif2 = aktif2.sonraki;
-                        aktif = aktif.sonraki;
-                    }
+//                    System.out.println("Harf: " + Harfler[i] + Harfler[j] + Harfler[k] + " Adres: " + aktif.hashCode());
                 }
             }
-
         }
+
+        aktif = ilkNode;
+
+        // 2 kelimeli harfleri buradan ekleyeceğiz. min ve alt basamak ekledik.
+        for (int i = 0; i < Harfler.length; i++) {
+            for (int j = 0; j < Harfler.length; j++) {
+                aktif = aktif.sonraki;
+                int minDeğer = aktif.hashCode();
+                for (int e = 0; e < Harfler.length - 1; e++) {
+                    aktif = aktif.sonraki;
+                }
+                ekle(" " + Harfler[i] + Harfler[j],true , minDeğer , aktif.hashCode());
+//                System.out.println("Harf" + Harfler[i] + Harfler[j] + " Adresi: "+ sonNode.onceki.hashCode()+ " minDeğer: " + minDeğer + " maxDeğer: " + aktif.hashCode());
+            }
+        }
+
+        // Tek kelimeli harfleri buradan ekleyeceğiz.
+        for (int i = 0; i < Harfler.length; i++) {
+            aktif = aktif.sonraki;
+            int minDeğer = aktif.hashCode();
+            for (int e = 0; e < Harfler.length - 1; e++) {
+                aktif = aktif.sonraki;
+            }
+            ekle(" " + Harfler[i] ,true , minDeğer , aktif.hashCode());
+//            System.out.println("Harf" + Harfler[i] + " Adresi: "+ sonNode.onceki.hashCode()+ " minDeğer: " + minDeğer + " maxDeğer: " + aktif.hashCode());
+        }
+
+        arayaekle("bilgisayar",false);
+
+        System.out.println("--------");
+
+        minmaxAra("bilgisayar");
+
+        Search.basamak4("bilgisayar",712256162,2054574951);
         listele();
-
-
     }
 }

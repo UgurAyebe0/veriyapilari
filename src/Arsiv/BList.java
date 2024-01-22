@@ -1,11 +1,15 @@
 package Arsiv;
 
+
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import static Arsiv.Search.minmaxAra;
+
+
 public class BList {
-    public static Node ilkNode = new Node("", ' ');
-    public static Node sonNode = new Node("", ' ');
+    public static Node ilkNode = new Node("", false, 0, 0);
+    public static Node sonNode = new Node("", false, 0, 0);
 
     public BList() {
         ilkNode.sonraki = sonNode;
@@ -14,75 +18,105 @@ public class BList {
         ilkNode.onceki = null;
     }
 
-    public static void ekle(String Harf, int altbasamak) {
-        Node yeninode = new Node(Harf, altbasamak);
+    public static void ekle(String Harf, boolean durum, int minBasamak, int maxBasamak) {
+        Node yeninode = new Node(Harf.trim(), durum, minBasamak, maxBasamak);
         yeninode.onceki = sonNode.onceki;
         sonNode.onceki.sonraki = yeninode;
         sonNode.onceki = yeninode;
         yeninode.sonraki = sonNode;
     }
 
+
+    public static void arayaekle(String Kelime, boolean durum) {
+        Node aktif;
+        aktif = ilkNode.sonraki;
+        Node yeninode = new Node(Kelime.trim(), durum, 0, 0);
+
+        int minAdres = minmaxAra(Kelime);
+
+        while (aktif != null) {
+            if (aktif.hashCode() == minAdres) {
+                aktif = aktif.onceki;
+                aktif.sonraki.onceki = yeninode;
+                yeninode.sonraki = aktif.sonraki;
+                aktif.sonraki = yeninode;
+                yeninode.onceki = aktif.onceki.sonraki;
+                break;
+            }
+            aktif = aktif.sonraki;
+        }
+    }
+
+
     public static void listele() {
+
+        // Burayı görsel anlamda göstermek için Consoll değilde Tree swing kullandım
+        // Cünkü Consolldan tam verimli göremiyoruz takip hiç edemiyoruz.
+
+
         JFrame deneme = new JFrame("Veri Yapıları");
-        deneme.setSize(500, 500);
+        deneme.setSize(900, 650);
         deneme.setLocationRelativeTo(null);
         DefaultMutableTreeNode tNode = new DefaultMutableTreeNode("Kütüphane Dizaynı");
-        char[] Harflers = {'A', 'B', 'C', 'Ç', 'D', 'E', 'F', 'G', 'Ğ', 'H', 'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'Y', 'Z'};
-        DefaultMutableTreeNode[][][][] dmt = new DefaultMutableTreeNode[30][30][30][30];
-        Node aktif = ilkNode.sonraki;
-        int a, b, c;
-        int ka = 0;
+        DefaultMutableTreeNode[] dmt = new DefaultMutableTreeNode[1000000];
 
+        Node aktif = sonNode.onceki;
+        int sayac = 0;
+        int sayacKontrol = 0;
 
-        while (aktif != sonNode) {
-            for (a = 1; a < Harflers.length + 1; a++) {
-                for (b = 1; b < Harflers.length + 1; b++) {
-                    for (c = 1; c < Harflers.length + 1; c++) {
-                        if (aktif != sonNode) {
-                            int length = aktif.Harf.length();
+        int sayac1 = 29;
+        int sayacKontrol1 = 0;
+        int a = 0;
 
-                            dmt[a][b][c][length] = new DefaultMutableTreeNode(aktif.Harf + " "
-                                    + " A: " + a
-                                    + " B: " + b
-                                    + " C: " + c
-                                    + " İ: " + length
-                            );
-
-                            switch (length) {
-                                case 1:
-                                    tNode.add(dmt[1][1][c][1]);
-                                    break;
-                                case 3:
-                                    ka++;
-                                    if (b - 1 == 0) {
-                                        System.out.println(b);
-                                        System.out.println(aktif.Harf + " "
-                                                + " A: " + a
-                                                + " B: " + b
-                                                + " C: " + c
-                                                + " İ: " + length
-                                        );
-                                        System.out.println(b-1);
-                                        dmt[1][1][b -1][1].add(dmt[1][b][c][3]);
-                                        break;
-                                    } else {
-                                        dmt[1][1][b - 1][1].add(dmt[1][b][c][3]);
-                                        break;
-                                    }
-                                default:
-                                    tNode.add(dmt[a][b][c][length]);
-                                    break;
-                            }
-
-                            aktif = aktif.sonraki;
-                        }
+        while (aktif != ilkNode) {
+            switch (aktif.Harf.length()) {
+                case 1:
+                    dmt[a] = new DefaultMutableTreeNode(aktif.Harf + " " + "Adresi: " + aktif.hashCode()
+                            + " Sonraki Adresi: " + aktif.onceki.hashCode()
+                            + "      Alt grub max adresi: " + aktif.minBasamak
+                            + "      Alt grub min adresi: " + aktif.maxBasamak);
+                    tNode.add(dmt[a]);
+                    a++;
+                    break;
+                case 2:
+                    sayacKontrol++;
+                    dmt[a] = new DefaultMutableTreeNode(aktif.Harf + " " + "Adresi: " + aktif.hashCode()
+                            + " Sonraki Adresi: " + aktif.onceki.hashCode()
+                            + "      Alt grub max adresi: " + aktif.minBasamak
+                            + "      Alt grub min adresi: " + aktif.maxBasamak);
+                    dmt[sayac].add(dmt[a]);
+                    a++;
+                    break;
+                case 3:
+                    if (aktif.durum) {
+                        sayacKontrol1++;
+                        dmt[a] = new DefaultMutableTreeNode(aktif.Harf + " " + "Adresi: " + aktif.hashCode() + " Sonraki Adresi: " + aktif.onceki.hashCode()
+                                + "      Alt grub max adresi: " + aktif.minBasamak
+                        );
+                        dmt[sayac1].add(dmt[a]);
+                        a++;
+                        break;
                     }
-                }
+                default:
+                    dmt[a] = new DefaultMutableTreeNode(aktif.Harf + " " + "Adresi: " + aktif.hashCode() + " Sonraki Adresi: " + aktif.sonraki.hashCode());
+                    dmt[a-1].add(dmt[a]);
+                    break;
             }
+            if (sayacKontrol == 29) {
+                sayacKontrol = 0;
+                sayac++;
+            }
+            if (sayacKontrol1 == 29) {
+                sayacKontrol1 = 0;
+                sayac1++;
+            }
+            aktif = aktif.onceki;
         }
         JTree tree = new JTree(tNode);
         JScrollPane scrollPane = new JScrollPane(tree);
-        deneme.getContentPane().add(scrollPane);
+        deneme.getContentPane().
+
+                add(scrollPane);
         deneme.setVisible(true);
     }
 }
